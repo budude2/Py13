@@ -40,13 +40,13 @@ class plan13:
 
         # WGS-84 Earth ellipsoid
         self.RE = 6378.137
-        FL = 1/298.257224
+        FL      = 1/298.257224
 
-        RP = self.RE*(1-FL)
-        XX = self.RE*self.RE
-        ZZ = RP*RP
+        RP = self.RE*(1 - FL)
+        XX = self.RE**2
+        ZZ = RP**2
 
-        D  = np.sqrt(XX*CL*CL + ZZ*SL*SL)
+        D  = np.sqrt(XX*CL**2 + ZZ*SL**2)
         Rx = XX/D + HT
         Rz = ZZ/D + HT
 
@@ -73,17 +73,17 @@ class plan13:
 
         # Convert angles to radians etc.
         self.RA = np.deg2rad(RA)
-        IN = np.deg2rad(IN)
+        IN      = np.deg2rad(IN)
         self.WP = np.deg2rad(WP)
         self.MA = np.deg2rad(MA)
         self.MM = MM*2*np.pi
-        M2 = M2*2*np.pi
+        M2      = M2*2*np.pi
 
-        YM = 365.25             # Mean Year,     days
-        YT = 365.2421874        # Tropical year, days
-        self.WW = 2*np.pi/YT       # Earth's rotation rate, rads/whole day
-        self.WE = 2*np.pi + self.WW     #       ditto            radians/day
-        W0 = self.WE/86400           #       ditto            radians/sec
+        YM      = 365.25            # Mean Year,     days
+        YT      = 365.2421874       # Tropical year, days
+        self.WW = 2*np.pi/YT        # Earth's rotation rate, rads/whole day
+        self.WE = 2*np.pi + self.WW #       ditto            radians/day
+        W0      = self.WE/86400     #       ditto            radians/sec
 
         # Observer's velocity, GEOCENTRIC coords. (VOz=0)
         self.VOx = -self.Oy*W0
@@ -94,39 +94,39 @@ class plan13:
         self.TE = self.TE - int(self.TE)
 
         """ Average Precession rates """
-        GM      = 3.986E5                # Earth's Gravitational constant km^3/s^2
-        J2      = 1.08263E-3             # 2nd Zonal coeff, Earth's Gravity Field
-        self.N0 = self.MM/86400               # Mean motion rad/s
-        self.A0 = (GM/self.N0/self.N0)**(1/3)       # Semi major axis km
-        self.B0 = self.A0*np.sqrt(1-self.EC*self.EC)  # Semi minor axis km
+        GM      = 3.986E5                           # Earth's Gravitational constant km^3/s^2
+        J2      = 1.08263E-3                        # 2nd Zonal coeff, Earth's Gravity Field
+        self.N0 = self.MM/86400                     # Mean motion rad/s
+        self.A0 = (GM/self.N0**2)**(1/3)            # Semi major axis km
+        self.B0 = self.A0*np.sqrt(1 - self.EC**2)   # Semi minor axis km
         self.SI = np.sin(IN)
         self.CI = np.cos(IN)
-        PC      = self.RE*self.A0/(self.B0*self.B0)
-        PC      = 1.5*J2*PC*PC*self.MM        # Precession const, rad/Day
-        self.QD = -PC*self.CI                 # Node precession rate, rad/day
-        self.WD =  PC*(5*self.CI*self.CI-1)/2      # Perigee precession rate, rad/day
-        self.DC = -2*M2/self.MM/3             # Drag coeff. (Angular momentum rate)/(Ang mom)  s^-1
+        PC      = self.RE*self.A0/(self.B0**2)
+        PC      = 1.5*J2*PC**2*self.MM              # Precession const, rad/Day
+        self.QD = -PC*self.CI                       # Node precession rate, rad/day
+        self.WD =  PC*(5*self.CI**2 - 1)/2          # Perigee precession rate, rad/day
+        self.DC = (-2*M2)/(self.MM*3)               # Drag coeff. (Angular momentum rate)/(Ang mom)  s^-1
 
         """ Please see end of listing for newer values; use old ones for test. """
         # Sidereal and Solar data. Rarely needs changing. Valid to year ~2015
-        YG = 2000
-        G0 = 98.9821 # GHAA, Year YG, Jan 0.0
+        YG          = 2000
+        G0          = 98.9821 # GHAA, Year YG, Jan 0.0
         # MA Sun and rate, deg, deg/day
-        MAS0 = 356.0507
-        self.MASD = 0.98560028
+        MAS0        = 356.0507
+        self.MASD   = 0.98560028
         # Sun's inclination
-        INS = np.radians(23.4393)
-        self.CNS = np.cos(INS)
-        self.SNS = np.sin(INS)
+        INS         = np.radians(23.4393)
+        self.CNS    = np.cos(INS)
+        self.SNS    = np.sin(INS)
         # Sun's Equation of centre terms
-        self.EQC1 = 0.03342
-        self.EQC2 = 0.00035
+        self.EQC1   = 0.03342
+        self.EQC2   = 0.00035
 
         # Bring Sun data to Satellite Epoch
-        TEG  = (self.DE - self.FNday(YG,1,0)) + self.TE            # Elapsed Time: Epoch - YG
-        self.GHAE = np.radians(G0) + TEG*self.WE            # GHA Aries, epoch
-        self.MRSE = np.radians(G0) + TEG*self.WW + np.pi  # Mean RA Sun at Sat epoch
-        self.MASE = np.radians(MAS0 + self.MASD*TEG)        # Mean MA Sun  ..
+        TEG         = (self.DE - self.FNday(YG, 1, 0)) + self.TE    # Elapsed Time: Epoch - YG
+        self.GHAE   = np.radians(G0) + TEG*self.WE                  # GHA Aries, epoch
+        self.MRSE   = np.radians(G0) + TEG*self.WW + np.pi          # Mean RA Sun at Sat epoch
+        self.MASE   = np.radians(MAS0 + self.MASD*TEG)              # Mean MA Sun  ..
 
         # Antenna unit vector in orbit plane coordinates.
         CO = np.cos(np.radians(ALON))
@@ -162,18 +162,18 @@ class plan13:
         EA = M
 
         while True:
-            C = np.cos(EA)
-            S = np.sin(EA)
-            DNOM = 1 - self.EC*C
-            D = (EA - self.EC*S - M)/DNOM   # Change to EA for better solution
-            EA = EA - D                # by this amount
+            C       = np.cos(EA)
+            S       = np.sin(EA)
+            DNOM    = 1 - self.EC*C
+            D       = (EA - self.EC*S - M)/DNOM   # Change to EA for better solution
+            EA      = EA - D                      # by this amount
 
             if np.abs(D) < 1E-5:
                 break
 
         # Distances
-        A = self.A0*KD
-        B = self.B0*KD
+        A       = self.A0*KD
+        B       = self.B0*KD
         self.RS = A*DNOM
 
         # Calc satellite position & velocity in plane of ellipse
@@ -182,12 +182,12 @@ class plan13:
         Sy = B*S
         Vy = B*C/DNOM*self.N0
 
-        AP = self.WP + self.WD*self.T*KDP
-        CW = np.cos(AP)
-        SW = np.sin(AP)
-        RAAN = self.RA + self.QD*self.T*KDP
-        CQ = np.cos(RAAN)
-        SQ = np.sin(RAAN)
+        AP      = self.WP + self.WD*self.T*KDP
+        CW      = np.cos(AP)
+        SW      = np.sin(AP)
+        RAAN    = self.RA + self.QD*self.T*KDP
+        CQ      = np.cos(RAAN)
+        SQ      = np.sin(RAAN)
 
         # Plane -> celestial coordinate transformation, [C] = [RAAN]*[IN]*[AP]
         CXx =  CW*CQ - SW*self.CI*SQ
@@ -217,7 +217,7 @@ class plan13:
         VELz = Vx*CZx + Vy*CZy
 
         # Also express SAT,ANT and VEL in GEOCENTRIC coordinates:
-        GHAA = self.GHAE + self.WE*T           # GHA Aries at elapsed time T
+        GHAA = self.GHAE + self.WE*T    # GHA Aries at elapsed time T
         C = np.cos(-GHAA)
         S = np.sin(-GHAA)
         
@@ -253,7 +253,7 @@ class plan13:
         Ry = self.Sy - self.Oy
         Rz = self.Sz - self.Oz 
 
-        R = np.sqrt(Rx*Rx+Ry*Ry+Rz*Rz)         # Range magnitude
+        R = np.sqrt(Rx*Rx + Ry*Ry + Rz*Rz)  # Range magnitude
         self.R = R
         # Normalise Range vector
         Rx=Rx/R
@@ -273,8 +273,8 @@ class plan13:
         self.SQ = SQ
 
         # Calculate sub-satellite Lat/Lon
-        SLON = np.rad2deg(np.arctan2(self.Sy, self.Sx))        # Lon, + East
-        SLAT = np.rad2deg(np.arcsin(self.Sz/self.RS))    # Lat, + North
+        SLON = np.rad2deg(np.arctan2(self.Sy, self.Sx)) # Lon, + East
+        SLAT = np.rad2deg(np.arcsin(self.Sz/self.RS))   # Lat, + North
         self.SLON = SLON
         self.SLAT = SLAT
 
@@ -285,9 +285,9 @@ class plan13:
     def isSatIlluminated(self):
         """ Find Solar angle, illumination, and eclipse status. """
         SSA = -(self.ANTx*self.SUNx + self.ANTy*self.SUNy + self.ANTz*self.SUNz)            # Sin of Sun angle -a.h
-        ILL = np.sqrt(1 - SSA*SSA)                                                          # Illumination
+        ILL = np.sqrt(1 - SSA**2)                                                          # Illumination
         CUA = -(self.SATx*self.SUNx + self.SATy*self.SUNy + self.SATz*self.SUNz)/self.RS    # Cos of umbral angle -h.s
-        UMD = self.RS*np.sqrt(1 - CUA*CUA)/self.RE                                          # Umbral dist, Earth radii
+        UMD = self.RS*np.sqrt(1 - CUA**2)/self.RE                                          # Umbral dist, Earth radii
 
         if CUA >= 0:
             ECL = "    +"
